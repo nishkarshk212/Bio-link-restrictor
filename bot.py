@@ -455,28 +455,6 @@ async def callback_handler(client, callback_query):
         await callback_query.answer()
         return
     
-    # Handle help button
-    if callback_query.data == "show_help":
-        help_text = (
-            "🤖 **Bio Link Restrictor Bot Help**\n\n"
-            "I automatically detect and restrict users who have links in their Telegram bio.\n\n"
-            "**Features:**\n"
-            "• Monitor new group members\n"
-            "• Check existing members when they send messages\n"
-            "• Remove messages from users with links in bio\n"
-            "• Configurable warning system\n\n"
-            "**Permissions:**\n"
-            "• Only group admins with change info permission can access settings\n"
-            "• Use /settings command in group chats\n\n"
-            "**Commands:**\n"
-            "/start - Start the bot\n"
-            "/help - Show this help message\n"
-            "/settings - Access bot settings (admin only)\n\n"
-            "Add me to your group and I'll start protecting it immediately!"
-        )
-        await callback_query.message.edit_text(help_text)
-        await callback_query.answer()
-        return
 
 if __name__ == "__main__":
     logger.info("Starting Bio Link Restrictor Bot...")
