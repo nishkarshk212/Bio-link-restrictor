@@ -8,7 +8,8 @@ load_dotenv()
 API_ID = int(os.getenv('API_ID', 123456))
 API_HASH = os.getenv('API_HASH', 'your_api_hash')
 BOT_TOKEN = os.getenv('BOT_TOKEN', 'your_bot_token')
-# No specific OWNER_ID needed
+# Note: Group owner (creator) automatically has access to settings
+# No specific OWNER_ID needed as group creator permissions are checked dynamically
 
 # Bot Settings
 BOT_NAME = "Bio Link Restrictor"

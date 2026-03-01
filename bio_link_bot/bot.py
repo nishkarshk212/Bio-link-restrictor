@@ -228,8 +228,8 @@ async def start_command(client, message):
     bot_username = bot_info.username or "BioLinkRestrictorBot"  # fallback username
     
     keyboard = InlineKeyboardMarkup([
-        [InlineKeyboardButton("♛ Add to Group", url=f"https://t.me/{bot_username}?startgroup=new")],
-        [InlineKeyboardButton("⚙️ Bot Settings", callback_data="open_settings")],
+        [InlineKeyboardButton("♛ Add to Group", url=f"https://t.me/{bot_username}?startgroup=settings")],
+        [InlineKeyboardButton("⚙️ Open Settings", callback_data="open_settings")],
         [InlineKeyboardButton("📚 Help", callback_data="show_help")]
     ])
     
@@ -254,7 +254,6 @@ async def start_command(client, message):
     
     await message.reply_text(start_message, reply_markup=keyboard)
 
-
 @app.on_message(filters.command("settings"))
 async def settings_command(client, message):
     """Handle /settings command"""
@@ -274,18 +273,13 @@ async def settings_command(client, message):
             await message.reply_text("❌ Only group admins with change info permission can access settings!")
             return
     
-    # Create keyboard with Open Here and Open in Private buttons
-    settings_keyboard = InlineKeyboardMarkup([
-        [InlineKeyboardButton("🔧 Open Here", callback_data="open_settings_here")],
-        [InlineKeyboardButton("🔒 Open in Private", callback_data="open_settings_private")]
-    ])
-    
+    keyboard = await get_settings_keyboard()
     await message.reply_text(
         "⚙️ **Bot Settings Panel**\n\n"
         f"Current Warning Limit: {WARN_LIMIT}\n"
         f"Current Penalty Action: {PENALTY_ACTION.upper()}\n\n"
-        "Choose how to open the settings:",
-        reply_markup=settings_keyboard
+        "Use the buttons below to adjust settings:",
+        reply_markup=keyboard
     )
 
 @app.on_message(filters.command("help") & filters.private)
@@ -338,36 +332,9 @@ async def callback_handler(client, callback_query):
         await callback_query.answer()
         return
     
-
-    
     # Handle settings button click (if we want to implement direct settings access)
     if callback_query.data == "open_settings":
         await callback_query.answer("Please use /settings command in a group chat where you have admin rights!", show_alert=True)
-        return
-    
-    # Handle the Open Here and Open in Private buttons from settings command
-    if callback_query.data == "open_settings_here" or callback_query.data == "open_settings_private":
-        user_id = callback_query.from_user.id
-        
-        # Check permissions for the settings
-        if not await has_change_info_permission(client, callback_query.message.chat.id, user_id):
-            await callback_query.answer("❌ Only group admins with change info permission can use these settings!", show_alert=True)
-            return
-        
-        # Create the actual settings keyboard
-        keyboard = await get_settings_keyboard()
-        await callback_query.message.edit_text(
-            "⚙️ **Bot Settings Panel**\n\n"
-            f"Current Warning Limit: {WARN_LIMIT}\n"
-            f"Current Penalty Action: {PENALTY_ACTION.upper()}\n\n"
-            "Use the buttons below to adjust settings:",
-            reply_markup=keyboard
-        )
-        
-        if callback_query.data == "open_settings_here":
-            await callback_query.answer("🔧 Opening settings here in the group")
-        else:
-            await callback_query.answer("🔒 Opening settings in private message")
         return
     
     # Check if user has permission (only group owner can access settings)
@@ -377,7 +344,6 @@ async def callback_handler(client, callback_query):
         return
     else:
         # In group chats, only users with change info permission can access settings
-        user_id = callback_query.from_user.id
         if not await has_change_info_permission(client, callback_query.message.chat.id, user_id):
             await callback_query.answer("❌ Only group admins with change info permission can use these settings!", show_alert=True)
             return
@@ -453,30 +419,6 @@ async def callback_handler(client, callback_query):
             reply_markup=keyboard
         )
         await callback_query.answer()
-        return
-    
-    # Handle help button
-    if callback_query.data == "show_help":
-        help_text = (
-            "🤖 **Bio Link Restrictor Bot Help**\n\n"
-            "I automatically detect and restrict users who have links in their Telegram bio.\n\n"
-            "**Features:**\n"
-            "• Monitor new group members\n"
-            "• Check existing members when they send messages\n"
-            "• Remove messages from users with links in bio\n"
-            "• Configurable warning system\n\n"
-            "**Permissions:**\n"
-            "• Only group admins with change info permission can access settings\n"
-            "• Use /settings command in group chats\n\n"
-            "**Commands:**\n"
-            "/start - Start the bot\n"
-            "/help - Show this help message\n"
-            "/settings - Access bot settings (admin only)\n\n"
-            "Add me to your group and I'll start protecting it immediately!"
-        )
-        await callback_query.message.edit_text(help_text)
-        await callback_query.answer()
-        return
 
 if __name__ == "__main__":
     logger.info("Starting Bio Link Restrictor Bot...")

@@ -1,0 +1,14 @@
+[Unit]
+Description=Telegram Bio Link Restrictor Bot
+After=network.target
+
+[Service]
+Type=simple
+User=master_jmjwhcjwxq
+WorkingDirectory=/home/master_jmjwhcjwxq/bio_link_bot
+ExecStart=/usr/bin/python3 bot.py
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
