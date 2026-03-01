@@ -313,6 +313,7 @@ async def help_command(client, message):
 @app.on_callback_query()
 async def callback_handler(client, callback_query):
     """Handle callback queries from inline keyboards"""
+    global WARN_LIMIT, PENALTY_ACTION
     user_id = callback_query.from_user.id
     
     # Handle help button
@@ -367,7 +368,16 @@ async def callback_handler(client, callback_query):
         if callback_query.data == "open_settings_here":
             await callback_query.answer("🔧 Opening settings here in the group")
         else:
-            await callback_query.answer("🔒 Opening settings in private message")
+            # Send settings to private chat
+            await client.send_message(
+                user_id,
+                "⚙️ **Bot Settings Panel**\n\n"
+                f"Current Warning Limit: {WARN_LIMIT}\n"
+                f"Current Penalty Action: {PENALTY_ACTION.upper()}\n\n"
+                "Use the buttons below to adjust settings:",
+                reply_markup=keyboard
+            )
+            await callback_query.answer("🔒 Settings sent to your private chat")
         return
     
     # Check if user has permission (only group owner can access settings)
@@ -381,8 +391,6 @@ async def callback_handler(client, callback_query):
         if not await has_change_info_permission(client, callback_query.message.chat.id, user_id):
             await callback_query.answer("❌ Only group admins with change info permission can use these settings!", show_alert=True)
             return
-    
-    global WARN_LIMIT, PENALTY_ACTION
     
     if callback_query.data == "increase_warn_limit":
         WARN_LIMIT += 1
